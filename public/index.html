@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Train Seat Booking</title>
+    <style>
+        .seat {
+            width: 30px;
+            height: 30px;
+            margin: 5px;
+            display: inline-block;
+            text-align: center;
+            line-height: 30px;
+            border: 1px solid #000;
+        }
+        .available { background-color: green; }
+        .booked { background-color: red; }
+    </style>
+</head>
+<body>
+    <h1>Train Seat Booking</h1>
+    <div id="seats-container"></div>
+    <div>
+        <label for="numSeats">Enter number of seats to book (1-7):</label>
+        <input type="number" id="numSeats" min="1" max="7">
+        <button onclick="bookSeats()">Book</button>
+    </div>
+
+    <script>
+        function loadSeats() {
+            fetch('/seats')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('seats-container');
+                    container.innerHTML = '';
+                    data.forEach(seat => {
+                        const seatDiv = document.createElement('div');
+                        seatDiv.className = `seat ${seat.status}`;
+                        seatDiv.textContent = seat.id;
+                        container.appendChild(seatDiv);
+                    });
+                });
+        }
+
+        function bookSeats() {
+            const numSeats = document.getElementById('numSeats').value;
+            fetch('/book', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ numSeats: parseInt(numSeats) })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                loadSeats();
+            });
+        }
+
+        loadSeats(); // Initial load of seat availability
+    </script>
+</body>
+</html>
